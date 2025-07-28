@@ -1,10 +1,9 @@
 import { createApiResponse, createApiError } from "@/lib/api-response";
 import { createClient } from "@/utils/supabase/server";
 import { memoBaseClient } from "@/utils/memobase/client";
-import { NextRequest } from "next/server";
 
 export async function DELETE(
-  req: NextRequest,
+  req: Request,
   context: { params: { event_id: string } }
 ) {
   const { event_id } = context.params;
