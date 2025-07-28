@@ -1,18 +1,14 @@
 import { createApiResponse, createApiError } from "@/lib/api-response";
-
-import { createClient } from "@/utils/supabase/server";
 import { memoBaseClient } from "@/utils/memobase/client";
 
 export async function GET() {
   try {
-    // get user from supabase
-    const supabase = await createClient();
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data?.user) {
-      return createApiError("未授权", 401);
+    const staticUserId = process.env.STATIC_USER_ID;
+    if (!staticUserId) {
+      return createApiError("Missing STATIC_USER_ID", 500);
     }
 
-    const user = await memoBaseClient.getOrCreateUser(data.user.id);
+    const user = await memoBaseClient.getOrCreateUser(staticUserId);
     const profiles = await user.profile();
 
     return createApiResponse(profiles, "获取记录成功");
@@ -28,11 +24,9 @@ export async function GET() {
  * @param body profile data
  */
 export async function POST(req: Request) {
-  // get user from supabase
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data?.user) {
-    return createApiError("未授权", 401);
+  const staticUserId = process.env.STATIC_USER_ID;
+  if (!staticUserId) {
+    return createApiError("Missing STATIC_USER_ID", 500);
   }
 
   const { content, topic, sub_topic } = await req.json();
@@ -41,12 +35,11 @@ export async function POST(req: Request) {
   }
 
   try {
-    const user = await memoBaseClient.getOrCreateUser(data.user.id);
-    await user.addProfile(content, topic, sub_topic)
+    const user = await memoBaseClient.getOrCreateUser(staticUserId);
+    await user.addProfile(content, topic, sub_topic);
+    return createApiResponse(null, "成功");
   } catch (error: unknown) {
     console.error(error);
     return createApiError("失败", 500);
   }
-
-  return createApiResponse(null, "成功");
 }
