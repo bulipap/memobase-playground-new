@@ -14,19 +14,21 @@ export async function POST(req: Request) {
 
   try {
     const user = await memoBaseClient.getOrCreateUser(staticUserId);
-
     const context = await user.context(750);
 
     const { messages, tools } = await req.json();
+
+    if (!messages || !Array.isArray(messages)) {
+      return new Response("Missing or invalid 'messages'", { status: 400 });
+    }
 
     const finalSystemPrompt = `You're Memobase Assistant, a helpful assistant that demonstrates the capabilities of Memobase Memory. \n${context}`;
     const result = streamText({
       model: openai(process.env.OPENAI_MODEL!),
       messages,
-      // forward system prompt and tools from the frontend
       system: finalSystemPrompt,
       tools: Object.fromEntries(
-        Object.entries<{ parameters: unknown }>(tools).map(([name, tool]) => [
+        Object.entries<{ parameters: unknown }>(tools || {}).map(([name, tool]) => [
           name,
           {
             parameters: jsonSchema(tool.parameters!),
@@ -36,9 +38,7 @@ export async function POST(req: Request) {
     });
 
     const lastMessage =
-      messages[messages.length - 1].content[
-        messages[messages.length - 1].content.length - 1
-      ].text;
+      messages[messages.length - 1]?.content?.[messages[messages.length - 1].content.length - 1]?.text || "";
 
     return result.toDataStreamResponse({
       headers: {
