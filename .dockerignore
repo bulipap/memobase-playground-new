@@ -1,6 +1,0 @@
-node_modules
-.pnpm-store
-.git
-.next
-.env
-*.log
