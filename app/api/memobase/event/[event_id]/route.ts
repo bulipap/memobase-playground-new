@@ -3,21 +3,21 @@ import { createClient } from "@/utils/supabase/server";
 import { memoBaseClient } from "@/utils/memobase/client";
 import { NextRequest } from "next/server";
 
-// ✅ Correct context typing using Next.js App Router
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { event_id: string } }
+  context: { params: Record<string, string | string[]> }
 ) {
+  const { event_id } = context.params;
+
+  if (!event_id || Array.isArray(event_id)) {
+    return createApiError("Bad Request", 400);
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
 
   if (error || !data?.user) {
     return createApiError("未授权", 401);
-  }
-
-  const event_id = params.event_id;
-  if (!event_id) {
-    return createApiError("Bad Request", 400);
   }
 
   try {
