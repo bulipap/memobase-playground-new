@@ -7,9 +7,9 @@ import { memoBaseClient } from "@/utils/memobase/client";
  */
 export async function DELETE(
   req: Request,
-  { params }: { params: { profile_id: string } }
+  { params }: { params: Promise<{ profile_id: string }> }
 ) {
-  const { profile_id } = params;
+  const { profile_id } = await params;
   const staticUserId = process.env.STATIC_USER_ID;
   if (!staticUserId) {
     return createApiError("Missing STATIC_USER_ID", 500);
@@ -35,9 +35,9 @@ export async function DELETE(
  */
 export async function PUT(
   req: Request,
-  { params }: { params: { profile_id: string } }
+  { params }: { params: Promise<{ profile_id: string }> }
 ) {
-  const { profile_id } = params;
+  const { profile_id } = await params;
   const staticUserId = process.env.STATIC_USER_ID;
   if (!staticUserId) {
     return createApiError("Missing STATIC_USER_ID", 500);
