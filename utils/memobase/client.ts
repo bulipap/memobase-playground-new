@@ -1,10 +1,13 @@
 import { MemoBaseClient } from "@memobase/memobase";
 
-const url = process.env.NEXT_PUBLIC_MEMOBASE_PROJECT_URL;
-const key = process.env.NEXT_PUBLIC_MEMOBASE_API_KEY;
+// ✅ Allow both frontend (NEXT_PUBLIC_*) and backend (server-only) environments
+const url =
+  process.env.MEMOBASE_PROJECT_URL || process.env.NEXT_PUBLIC_MEMOBASE_PROJECT_URL;
+const key =
+  process.env.MEMOBASE_API_KEY || process.env.NEXT_PUBLIC_MEMOBASE_API_KEY;
 
-console.log("[Build check] NEXT_PUBLIC_MEMOBASE_PROJECT_URL:", url);
-console.log("[Build check] NEXT_PUBLIC_MEMOBASE_API_KEY:", key);
+console.log("[Build check] MEMOBASE_PROJECT_URL:", url);
+console.log("[Build check] MEMOBASE_API_KEY:", key);
 
 if (!url || !key) {
   throw new Error("❌ Missing MemoBase env vars at build time");
