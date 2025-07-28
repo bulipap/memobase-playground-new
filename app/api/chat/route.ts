@@ -1,21 +1,19 @@
 import { openai } from "@/lib/openai";
 import { jsonSchema, streamText } from "ai";
 
-import { createClient } from "@/utils/supabase/server";
 import { memoBaseClient } from "@/utils/memobase/client";
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  // get user from supabase
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data?.user) {
-    return new Response("Unauthorized", { status: 401 });
+  // use static user id from env
+  const staticUserId = process.env.STATIC_USER_ID;
+  if (!staticUserId) {
+    return new Response("Missing STATIC_USER_ID", { status: 500 });
   }
 
   try {
-    const user = await memoBaseClient.getOrCreateUser(data.user.id);
+    const user = await memoBaseClient.getOrCreateUser(staticUserId);
 
     const context = await user.context(750);
 
