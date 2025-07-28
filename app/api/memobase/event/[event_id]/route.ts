@@ -5,13 +5,9 @@ import { NextRequest } from "next/server";
 
 export async function DELETE(
   req: NextRequest,
-  context: { params: Record<string, string | string[]> }
+  context: { params: { event_id: string } }
 ) {
   const { event_id } = context.params;
-
-  if (!event_id || Array.isArray(event_id)) {
-    return createApiError("Bad Request", 400);
-  }
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
@@ -24,8 +20,8 @@ export async function DELETE(
     const user = await memoBaseClient.getOrCreateUser(data.user.id);
     await user.deleteEvent(event_id);
     return createApiResponse(null, "删除成功");
-  } catch (error: unknown) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     return createApiError("删除失败", 500);
   }
 }
