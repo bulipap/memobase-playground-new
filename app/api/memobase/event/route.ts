@@ -1,18 +1,15 @@
 import { createApiResponse, createApiError } from "@/lib/api-response";
-
-import { createClient } from "@/utils/supabase/server";
 import { memoBaseClient } from "@/utils/memobase/client";
 
 export async function GET() {
   try {
-    // get user from supabase
-    const supabase = await createClient();
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data?.user) {
-      return createApiError("未授权", 401);
+    // Use static user ID
+    const staticUserId = process.env.STATIC_USER_ID;
+    if (!staticUserId) {
+      return createApiError("Missing STATIC_USER_ID", 500);
     }
 
-    const user = await memoBaseClient.getOrCreateUser(data.user.id);
+    const user = await memoBaseClient.getOrCreateUser(staticUserId);
     const event = await user.event();
 
     return createApiResponse(event, "获取记录成功");
